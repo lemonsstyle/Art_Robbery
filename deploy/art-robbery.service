@@ -1,0 +1,19 @@
+[Unit]
+Description=Art Robbery online table
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/steal
+Environment=NODE_ENV=production
+Environment=HOST=0.0.0.0
+Environment=PORT=8787
+ExecStart=/home/ubuntu/.nvm/versions/node/v22.23.2/bin/node /home/ubuntu/steal/server/dist/index.js
+Restart=always
+RestartSec=3
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

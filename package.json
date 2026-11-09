@@ -1,0 +1,21 @@
+{
+  "name": "art-robbery-online",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run build -w @steal/shared && (npm run dev -w @steal/server & npm run dev -w @steal/client)",
+    "build": "npm run build -w @steal/shared && npm run build -w @steal/server && npm run build -w @steal/client",
+    "start": "node server/dist/index.js",
+    "test": "npm run build -w @steal/shared && npm run test -w @steal/shared && npm run test -w @steal/server",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

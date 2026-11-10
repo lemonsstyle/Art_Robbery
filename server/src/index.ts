@@ -495,6 +495,12 @@ export function startServer(
     store,
     close: async () => {
       clearInterval(sweepTimer);
+      for (const room of store.rooms.values()) {
+        store.clearTimers(room);
+        for (const timer of room.disconnectTimers.values()) clearTimeout(timer);
+        room.disconnectTimers.clear();
+      }
+      store.rooms.clear();
       for (const client of wss.clients) client.terminate();
       wss.close();
       await new Promise<void>((resolveClose) => server.close(() => resolveClose()));

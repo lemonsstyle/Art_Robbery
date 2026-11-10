@@ -20,6 +20,8 @@ class SoundEngine {
   private context: AudioContext | null = null;
   private master: GainNode | null = null;
   private muted = false;
+  private voiceBuffers = new Map<string, AudioBuffer>();
+  private voiceLoads = new Map<string, Promise<AudioBuffer | null>>();
 
   constructor() {
     try {
@@ -50,6 +52,69 @@ class SoundEngine {
 
   unlock(): void {
     this.ensure();
+  }
+
+  preloadVoice(url: string): void {
+    if (typeof window === "undefined") return;
+    if (this.voiceBuffers.has(url) || this.voiceLoads.has(url)) return;
+    const context = this.ensure();
+    if (!context) return;
+    const load = fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error("voice unavailable");
+        return response.arrayBuffer();
+      })
+      .then(
+        (data) =>
+          new Promise<AudioBuffer>((resolve, reject) => {
+            context.decodeAudioData(data, resolve, reject);
+          })
+      )
+      .then((buffer) => {
+        this.voiceBuffers.set(url, buffer);
+        return buffer;
+      })
+      .catch(() => null)
+      .finally(() => {
+        this.voiceLoads.delete(url);
+      });
+    this.voiceLoads.set(url, load);
+  }
+
+  playVoice(url: string | undefined): void {
+    if (!url || this.muted) return;
+    const context = this.ensure();
+    if (!context) return;
+    const start = (buffer: AudioBuffer) => {
+      if (this.muted) return;
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      const gain = context.createGain();
+      gain.gain.value = 0.9;
+      source.connect(gain);
+      gain.connect(context.destination);
+      source.start();
+    };
+    const play = (buffer: AudioBuffer) => {
+      if (context.state === "running") start(buffer);
+      else void context.resume().then(() => start(buffer)).catch(() => undefined);
+    };
+    const ready = this.voiceBuffers.get(url);
+    if (ready) {
+      play(ready);
+      return;
+    }
+    const loading = this.voiceLoads.get(url);
+    if (loading) {
+      void loading.then((buffer) => {
+        if (buffer) play(buffer);
+      });
+      return;
+    }
+    this.preloadVoice(url);
+    void this.voiceLoads.get(url)?.then((buffer) => {
+      if (buffer) play(buffer);
+    });
   }
 
   play(name: SoundName): void {

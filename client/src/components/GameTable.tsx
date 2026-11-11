@@ -60,6 +60,10 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
 
   const myPlayer = view.players.find((player) => player.id === myId);
   const opponents = view.players.filter((player) => player.id !== myId);
+  const topOpponentCount = opponents.length === 3 ? 1 : Math.min(opponents.length, 2);
+  const topOpponents = opponents.slice(0, topOpponentCount);
+  const sideOpponents =
+    opponents.length >= 3 ? opponents.slice(topOpponentCount, topOpponentCount + 2) : [];
   const currentPlayer = view.players.find((player) => player.id === view.currentPlayerId);
   const pending = view.pending;
   const pendingMine = pending?.actorId === myId;
@@ -269,6 +273,20 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
       )
     : "";
 
+  const renderOpponent = (player: (typeof opponents)[number], extra = "") => (
+    <PlayerSeat
+      key={player.id}
+      player={player}
+      currentRaid={view.raid}
+      isCurrent={view.currentPlayerId === player.id}
+      hasDog={view.dogHolderId === player.id}
+      chatText={bubbles[player.id]?.text}
+      eligibleTileIds={eligibleLoot.get(player.id)}
+      onTileClick={(tileId) => onLootTile(player.id, tileId)}
+      className={extra}
+    />
+  );
+
   const turnText =
     view.phase === "RAID_END"
       ? "本轮结束，正在整理赃物"
@@ -389,83 +407,91 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
       </header>
 
       <main className="game__board">
-        <section className="opponents" aria-label="对手">
-          {opponents.map((player) => (
-            <PlayerSeat
-              key={player.id}
-              player={player}
-              currentRaid={view.raid}
-              isCurrent={view.currentPlayerId === player.id}
-              hasDog={view.dogHolderId === player.id}
-              chatText={bubbles[player.id]?.text}
-              eligibleTileIds={eligibleLoot.get(player.id)}
-              onTileClick={(tileId) => onLootTile(player.id, tileId)}
-            />
-          ))}
+        <section
+          className="opponents"
+          data-count={topOpponents.length}
+          aria-label="对手"
+        >
+          {topOpponents.map((player) => renderOpponent(player))}
         </section>
 
-        <section className={tableClassName} aria-label="牌桌中央">
-          <div className="table__round">
-            <span className="table__round-index">0{view.raid}</span>
-            <div className="table__round-copy">
-              <p className="eyebrow">RAID {view.raid} / 4</p>
-              <h2>
-                {raidInfo.name}
-                <span>{raidInfo.en}</span>
-              </h2>
-            </div>
-            <span
-              key={`${view.currentPlayerId ?? "none"}-${pending?.kind ?? "none"}`}
-              className={[
-                "turn-pill",
-                myTurn ? "turn-pill--you" : "",
-                pendingMine ? "turn-pill--choose" : ""
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              role="status"
-              aria-live="polite"
-            >
-              <i />
-              {turnText}
-            </span>
-            <span className="table__round-icon" aria-hidden="true">
-              <RaidIcon raid={view.raid} size={42} />
-            </span>
-          </div>
+        <div
+          className={[
+            "table-zone",
+            sideOpponents.length > 0 ? "table-zone--with-sides" : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {sideOpponents[0] &&
+            renderOpponent(sideOpponents[0], "seat--side seat--side-left")}
 
-          <div className="table__center" data-discard>
-            <div className="table__middle" data-middle>
-              {middleSlots.map(({ slot, tile, key }) =>
-                tile ? (
-                  <LootTile
-                    key={key}
-                    tile={tile}
-                    eligible={eligibleMiddle.has(tile.id)}
-                    disabled={!eligibleMiddle.has(tile.id)}
-                    onClick={
-                      eligibleMiddle.has(tile.id) ? () => onMiddleTile(tile.id) : undefined
-                    }
-                    className="tile--enter"
-                  />
-                ) : (
-                  <span
-                    className="table__slot-empty"
-                    key={key}
-                    aria-label={`${slot.kind === "boss" ? "老板" : `数字 ${slot.value}`} 已取走`}
-                  />
-                )
-              )}
+            <section className={tableClassName} aria-label="牌桌中央">
+            <div className="table__round">
+              <span className="table__round-index">0{view.raid}</span>
+              <div className="table__round-copy">
+                <p className="eyebrow">RAID {view.raid} / 4</p>
+                <h2>
+                  {raidInfo.name}
+                  <span>{raidInfo.en}</span>
+                </h2>
+              </div>
+              <span
+                key={`${view.currentPlayerId ?? "none"}-${pending?.kind ?? "none"}`}
+                className={[
+                  "turn-pill",
+                  myTurn ? "turn-pill--you" : "",
+                  pendingMine ? "turn-pill--choose" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                role="status"
+                aria-live="polite"
+              >
+                <i />
+                {turnText}
+              </span>
+              <span className="table__round-icon" aria-hidden="true">
+                <RaidIcon raid={view.raid} size={42} />
+              </span>
             </div>
-          </div>
+  
+            <div className="table__center" data-discard>
+              <div className="table__middle" data-middle>
+                {middleSlots.map(({ slot, tile, key }) =>
+                  tile ? (
+                    <LootTile
+                      key={key}
+                      tile={tile}
+                      eligible={eligibleMiddle.has(tile.id)}
+                      disabled={!eligibleMiddle.has(tile.id)}
+                      onClick={
+                        eligibleMiddle.has(tile.id) ? () => onMiddleTile(tile.id) : undefined
+                      }
+                      className="tile--enter"
+                    />
+                  ) : (
+                    <span
+                      className="table__slot-empty"
+                      key={key}
+                      aria-label={`${slot.kind === "boss" ? "老板" : `数字 ${slot.value}`} 已取走`}
+                    />
+                  )
+                )}
+              </div>
+            </div>
+  
+            {(eventText || view.notice) && (
+              <div className="table__bottom-rail" aria-live="polite">
+                {eventText && <span className="table__event">{eventText}</span>}
+                {view.notice && <span className="table__notice">{view.notice}</span>}
+              </div>
+            )}
+            </section>
 
-          {(eventText || view.notice) && (
-            <div className="table__bottom-rail" aria-live="polite">
-              {eventText && <span className="table__event">{eventText}</span>}
-              {view.notice && <span className="table__notice">{view.notice}</span>}
-            </div>
-          )}
-        </section>
+          {sideOpponents[1] &&
+            renderOpponent(sideOpponents[1], "seat--side seat--side-right")}
+        </div>
 
         <section className="you-area" aria-label="你的手牌与赃物">
           <PendingPanel

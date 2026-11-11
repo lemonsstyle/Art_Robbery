@@ -12,6 +12,7 @@ interface PlayerSeatProps {
   chatText?: string;
   eligibleTileIds?: Set<string>;
   onTileClick?: (tileId: string) => void;
+  className?: string;
 }
 
 export function PlayerSeat({
@@ -22,7 +23,8 @@ export function PlayerSeat({
   hasDog = false,
   chatText,
   eligibleTileIds,
-  onTileClick
+  onTileClick,
+  className = ""
 }: PlayerSeatProps) {
   const activeLoot = player.loot
     .filter((tile) => !tile.secured)
@@ -49,7 +51,8 @@ export function PlayerSeat({
         isCurrent ? "is-current" : "",
         currentBoss ? "seat--boss-holder" : "",
         hasDog ? "seat--dog-holder" : "",
-        player.connected ? "" : "is-offline"
+        player.connected ? "" : "is-offline",
+        className
       ]
         .filter(Boolean)
         .join(" ")}

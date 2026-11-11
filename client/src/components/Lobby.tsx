@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { GameView } from "@steal/shared";
+import { MAX_PLAYERS, type GameView } from "@steal/shared";
 import { CheckIcon, CopyIcon, LeaveIcon, LinkIcon, RulesIcon } from "./Icons";
 import { copyText } from "../lib/clipboard";
 
@@ -135,10 +135,10 @@ export function Lobby({ view, myId, onStart, onLeave, onRules }: LobbyProps) {
         <section className="lobby__seats" aria-label="玩家席位">
           <div className="lobby__seats-head">
             <h2>桌边的人</h2>
-            <span>{connectedCount} / 5</span>
+            <span>{connectedCount} / {MAX_PLAYERS}</span>
           </div>
           <ul className="seat-list">
-            {Array.from({ length: 5 }, (_, index) => {
+            {Array.from({ length: MAX_PLAYERS }, (_, index) => {
               const player = view.players[index];
               if (!player) {
                 return (

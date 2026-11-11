@@ -6519,3 +6519,235 @@ button:disabled {
     display: inline;
   }
 }
+
+/* Multi-player seating: top row and side seats */
+
+.table-zone {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.table-zone > .table {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.table-zone--with-sides {
+  grid-template-columns: clamp(180px, 16vw, 230px) minmax(0, 1fr) clamp(180px, 16vw, 230px);
+  gap: 10px;
+}
+
+.table-zone--with-sides > .table {
+  grid-column: 2;
+}
+
+.opponents[data-count="2"] {
+  gap: clamp(24px, 10vw, 180px);
+}
+
+.seat--side {
+  align-self: center;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  z-index: 5;
+}
+
+.seat--side-left {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.seat--side-right {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+@media (max-width: 900px) {
+  .table-zone--with-sides {
+    grid-template-columns: clamp(48px, 15vw, 62px) minmax(0, 1fr) clamp(48px, 15vw, 62px);
+    gap: 4px;
+  }
+
+  .opponents[data-count="2"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+    overflow-x: visible;
+  }
+
+  .opponents[data-count="2"] .seat {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .seat--side {
+    padding: 4px 3px;
+    border-radius: 10px;
+    max-height: min(360px, 100%);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .seat--side::-webkit-scrollbar {
+    display: none;
+  }
+
+  .seat--side .seat__top {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .seat--side .seat__avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+  }
+
+  .seat--side .seat__identity {
+    align-items: center;
+  }
+
+  .seat--side .seat__name {
+    font-size: 9px;
+    gap: 0;
+    max-width: 54px;
+  }
+
+  .seat--side .seat__name em,
+  .seat--side .seat__host,
+  .seat--side .seat__meta {
+    display: none;
+  }
+
+  .seat--side .holder-seals {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: 3px;
+  }
+
+  .seat--side .holder-seal {
+    min-height: 20px;
+    padding: 0 3px;
+    border-width: 1px;
+    gap: 0;
+  }
+
+  .seat--side .holder-seal b {
+    display: none;
+  }
+
+  .seat--side .holder-seal svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .seat--side .seat__loot {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 2px;
+    min-height: 0;
+    margin-top: 4px;
+  }
+
+  .seat--side .seat__loot .tile--sm {
+    --tile: 32px;
+  }
+
+  .seat--side .seat__empty {
+    display: none;
+  }
+
+  .seat--side .seat__vault {
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+    padding-top: 3px;
+  }
+
+  .seat--side .seat__vault-label {
+    display: none;
+  }
+
+  .seat--side .vault {
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .seat--side .vault em {
+    display: none;
+  }
+
+  .seat--side .vault__stack {
+    width: 22px;
+    height: 22px;
+  }
+
+  .seat--side .seat__turn-tag {
+    position: static;
+    margin-top: 4px;
+    min-height: 16px;
+    padding: 0 4px;
+    font-size: 7px;
+    gap: 2px;
+  }
+
+  .seat--side .seat__turn-tag i {
+    width: 3px;
+    height: 3px;
+  }
+
+  .seat--side .seat__offline {
+    position: static;
+    margin-top: 2px;
+    font-size: 7px;
+    text-align: center;
+  }
+
+  .seat--side .chat-bubble--seat {
+    bottom: auto;
+    top: -4px;
+    max-width: 150px;
+    font-size: 9px;
+    z-index: 30;
+  }
+}
+
+@media (max-width: 900px) {
+  .table-zone--with-sides .table__round .eyebrow,
+  .table-zone--with-sides .table__round-copy h2 span {
+    display: none;
+  }
+
+  .table-zone--with-sides .table__round {
+    gap: 6px;
+    padding-bottom: 3px;
+  }
+
+  .table-zone--with-sides .table__round-index {
+    font-size: 22px;
+  }
+
+  .table-zone--with-sides .table__round-copy h2 {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .table-zone--with-sides .table__round .turn-pill {
+    min-height: 22px;
+    padding: 0 7px;
+    font-size: 8px;
+  }
+}

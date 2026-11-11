@@ -58,7 +58,9 @@ export class RoomStore {
   join(code: string, name: string): { room: Room; player: RoomPlayer } {
     const room = this.requireRoom(code);
     if (room.game) throw new Error("这局牌已经开始，等下一局吧");
-    if (room.players.length >= MAX_PLAYERS) throw new Error("房间已满（最多 5 人）");
+    if (room.players.length >= MAX_PLAYERS) {
+      throw new Error(`房间已满（最多 ${MAX_PLAYERS} 人）`);
+    }
     const cleaned = this.cleanName(name);
     if (room.players.some((player) => player.name.toLowerCase() === cleaned.toLowerCase())) {
       throw new Error("这个名字已经有人用了");

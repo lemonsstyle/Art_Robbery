@@ -47,7 +47,7 @@ export interface PublicPlayer {
 
 export interface StealOption {
   playerId: string;
-  tileIds: string[];
+  count: number;
 }
 
 export type Pending =

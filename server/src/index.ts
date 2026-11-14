@@ -294,11 +294,7 @@ export function startServer(
           }
           case "chooseSteal": {
             const { room, player, game } = requireSession(session);
-            game.chooseSteal(
-              player.id,
-              readString(message, "playerId"),
-              readString(message, "tileId")
-            );
+            game.chooseSteal(player.id, readString(message, "playerId"));
             settle(room);
             return;
           }

@@ -24,7 +24,7 @@ export interface SocketApi {
   start: () => void;
   playCard: (cardId: string) => void;
   chooseTile: (tileId: string) => void;
-  chooseSteal: (playerId: string, tileId: string) => void;
+  chooseSteal: (playerId: string) => void;
   chooseGreedy: (tileId: string) => void;
   dogResponse: (giveDog: boolean) => void;
   sendChat: (messageId: string) => void;
@@ -258,7 +258,7 @@ export function useSocket(): SocketApi {
     start: () => send({ type: "start" }),
     playCard: (cardId) => send({ type: "play", cardId }),
     chooseTile: (tileId) => send({ type: "chooseTile", tileId }),
-    chooseSteal: (playerId, tileId) => send({ type: "chooseSteal", playerId, tileId }),
+    chooseSteal: (playerId) => send({ type: "chooseSteal", playerId }),
     chooseGreedy: (tileId) => send({ type: "chooseGreedy", tileId }),
     dogResponse: (giveDog) => send({ type: "dogResponse", giveDog }),
     sendChat: (messageId) => send({ type: "quickChat", messageId }),

@@ -10,8 +10,8 @@ interface PlayerSeatProps {
   isYou?: boolean;
   hasDog?: boolean;
   chatText?: string;
-  eligibleTileIds?: Set<string>;
-  onTileClick?: (tileId: string) => void;
+  stealable?: boolean;
+  onSteal?: () => void;
   className?: string;
 }
 
@@ -22,8 +22,8 @@ export function PlayerSeat({
   isYou = false,
   hasDog = false,
   chatText,
-  eligibleTileIds,
-  onTileClick,
+  stealable = false,
+  onSteal,
   className = ""
 }: PlayerSeatProps) {
   const activeLoot = player.loot
@@ -51,6 +51,7 @@ export function PlayerSeat({
         isCurrent ? "is-current" : "",
         currentBoss ? "seat--boss-holder" : "",
         hasDog ? "seat--dog-holder" : "",
+        stealable ? "is-stealable" : "",
         player.connected ? "" : "is-offline",
         className
       ]
@@ -97,18 +98,7 @@ export function PlayerSeat({
           <span className="seat__empty">还没有赃物</span>
         ) : (
           activeLoot.map((tile) => (
-            <LootTile
-              key={tile.id}
-              tile={tile}
-              size="sm"
-              eligible={eligibleTileIds?.has(tile.id) ?? false}
-              disabled={!eligibleTileIds?.has(tile.id)}
-              onClick={
-                eligibleTileIds?.has(tile.id) && onTileClick
-                  ? () => onTileClick(tile.id)
-                  : undefined
-              }
-            />
+            <LootTile key={tile.id} tile={tile} size="sm" />
           ))
         )}
       </div>
@@ -126,6 +116,14 @@ export function PlayerSeat({
         <div className="chat-bubble chat-bubble--seat" role="status">
           {chatText}
         </div>
+      )}
+      {stealable && onSteal && (
+        <button
+          type="button"
+          className="seat__steal"
+          onClick={onSteal}
+          aria-label={`抢 ${player.name} 的圆片`}
+        />
       )}
     </article>
   );

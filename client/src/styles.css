@@ -3189,6 +3189,32 @@ button:disabled {
   max-width: 320px;
 }
 
+.seat.is-stealable {
+  border-color: var(--red);
+  animation: eligiblePulse 1.6s var(--ease-soft) infinite;
+}
+
+.seat__steal {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.seat__steal:hover {
+  background: rgba(211, 59, 44, 0.06);
+}
+
+.seat__steal:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
 .seat__loot .tile--sm {
   --tile: 44px;
 }

@@ -132,6 +132,30 @@ describe("game flow", () => {
     expect(game.players[1].loot).toHaveLength(0);
   });
 
+  it("lets the player choose only the victim when several hold matching tiles", () => {
+    const game = makeGame(3);
+    game.players[0].hand = [{ id: "n3-pick", type: "number", value: 3 }];
+    game.players[1].loot = [loot(tile("p2-t3-a", 3)), loot(tile("p2-t3-b", 3))];
+    game.players[2].loot = [loot(tile("p3-t3", 3))];
+    game.middle = [tile("t1-pick", 1)];
+    game.currentPlayerId = "p1";
+
+    game.playCard("p1", "n3-pick");
+    expect(game.pending).toMatchObject({
+      kind: "steal",
+      options: [
+        { playerId: "p2", count: 2 },
+        { playerId: "p3", count: 1 }
+      ]
+    });
+
+    game.chooseSteal("p1", "p2");
+
+    expect(game.players[0].loot.filter((item) => item.value === 3)).toHaveLength(1);
+    expect(game.players[1].loot).toHaveLength(1);
+    expect(game.players[2].loot).toHaveLength(1);
+  });
+
   it("lets the dog holder choose between giving the dog or the tile", () => {
     const game = makeGame();
     game.players[0].hand = [{ id: "n3-test", type: "number", value: 3 }];

@@ -194,14 +194,12 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
     return set;
   }, [pending, pendingMine]);
 
-  const eligibleLoot = useMemo(() => {
-    const map = new Map<string, Set<string>>();
+  const stealTargets = useMemo(() => {
+    const set = new Set<string>();
     if (pending && pendingMine && pending.kind === "steal") {
-      for (const option of pending.options) {
-        map.set(option.playerId, new Set(option.tileIds));
-      }
+      for (const option of pending.options) set.add(option.playerId);
     }
-    return map;
+    return set;
   }, [pending, pendingMine]);
 
   const playSelected = () => {
@@ -232,10 +230,10 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
     if (pending.kind === "greedy") api.chooseGreedy(tileId);
   };
 
-  const onLootTile = (playerId: string, tileId: string) => {
+  const onStealTarget = (playerId: string) => {
     if (!pending || !pendingMine || pending.kind !== "steal") return;
     sound.play("select");
-    api.chooseSteal(playerId, tileId);
+    api.chooseSteal(playerId);
   };
 
   const myAllLoot = myPlayer?.loot ?? [];
@@ -281,8 +279,8 @@ export function GameTable({ view, myId, connected, api, onRules }: GameTableProp
       isCurrent={view.currentPlayerId === player.id}
       hasDog={view.dogHolderId === player.id}
       chatText={bubbles[player.id]?.text}
-      eligibleTileIds={eligibleLoot.get(player.id)}
-      onTileClick={(tileId) => onLootTile(player.id, tileId)}
+      stealable={stealTargets.has(player.id)}
+      onSteal={() => onStealTarget(player.id)}
       className={extra}
     />
   );

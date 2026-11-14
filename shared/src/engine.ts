@@ -169,15 +169,15 @@ export class Game {
     this.finishTurn();
   }
 
-  chooseSteal(playerId: string, targetId: string, tileId: string): void {
+  chooseSteal(playerId: string, targetId: string): void {
     const pending = this.pending;
     if (!pending || pending.kind !== "steal") throw new GameError("现在不需要选择抢夺目标");
     if (pending.actorId !== playerId) throw new GameError("还没轮到你选择");
     const option = pending.options.find((item) => item.playerId === targetId);
-    if (!option || !option.tileIds.includes(tileId)) throw new GameError("这枚圆片不能被抢");
+    if (!option) throw new GameError("这位玩家没有可抢的圆片");
     this.seq += 1;
     this.pending = null;
-    this.attemptSteal(this.player(playerId), targetId, tileId, {
+    this.stealNumberTile(this.player(playerId), targetId, pending.value, {
       id: pending.cardId,
       type: "number",
       value: pending.value
@@ -251,7 +251,7 @@ export class Game {
           return true;
         case "steal": {
           const option = this.pending.options[0];
-          this.chooseSteal(playerId, option.playerId, option.tileIds[0]);
+          this.chooseSteal(playerId, option.playerId);
           return true;
         }
         case "greedy":
@@ -296,10 +296,10 @@ export class Game {
       return;
     }
     const options = this.stealOptions(player.id, value);
-    const total = options.reduce((count, option) => count + option.tileIds.length, 0);
+    const total = options.reduce((count, option) => count + option.count, 0);
     if (total === 1) {
       const option = options[0];
-      this.attemptSteal(player, option.playerId, option.tileIds[0], card);
+      this.stealNumberTile(player, option.playerId, value, card);
       return;
     }
     if (total > 1) {
@@ -436,17 +436,30 @@ export class Game {
       .filter((candidate) => candidate.id !== playerId)
       .map((candidate) => ({
         playerId: candidate.id,
-        tileIds: candidate.loot
-          .filter(
-            (tile) =>
-              !tile.secured &&
-              tile.raid === this.raid &&
-              tile.kind === "number" &&
-              tile.value === value
-          )
-          .map((tile) => tile.id)
+        count: this.matchingLoot(candidate, value).length
       }))
-      .filter((option) => option.tileIds.length > 0);
+      .filter((option) => option.count > 0);
+  }
+
+  private matchingLoot(player: InternalPlayer, value: number): LootTile[] {
+    return player.loot.filter(
+      (tile) =>
+        !tile.secured &&
+        tile.raid === this.raid &&
+        tile.kind === "number" &&
+        tile.value === value
+    );
+  }
+
+  private stealNumberTile(
+    thief: InternalPlayer,
+    targetId: string,
+    value: number,
+    card: Card
+  ): void {
+    const tile = this.matchingLoot(this.player(targetId), value)[0];
+    if (!tile) throw new GameError("这枚圆片已经不能被抢");
+    this.attemptSteal(thief, targetId, tile.id, card);
   }
 
   private finishTurn(): void {

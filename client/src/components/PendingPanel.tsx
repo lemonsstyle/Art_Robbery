@@ -82,7 +82,7 @@ export function PendingPanel({ view, myId, now, onDogResponse }: PendingPanelPro
     pending.kind === "middle"
       ? `中央有几枚数字 ${pending.value}，挑一枚。`
       : pending.kind === "steal"
-        ? `中央没有数字 ${pending.value} 了，从亮起的人手里挑一枚。`
+        ? `中央没有数字 ${pending.value} 了，从亮起的人里挑一个。`
         : "中央的圆片随你挑一枚。";
 
   return (
